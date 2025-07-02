@@ -7,4 +7,3 @@ from pydantic import BaseModel
 class ModerationResponse(BaseModel):
     status: Literal["OK", "REJECTED"]
     reason: Optional[str] = None
-
