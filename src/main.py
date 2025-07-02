@@ -1,4 +1,5 @@
 import os
+from typing import Union
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -16,7 +17,24 @@ NSFW_API_URL = os.getenv("NSFW_API_URL")
 DEEPAI_API_KEY = os.getenv("DEEPAI_API_KEY")
 
 @app.post("/moderate")
-async def moderate_image(file: UploadFile = File(...)):
+async def moderate_image(file: UploadFile = File(...)) -> Union[dict, JSONResponse]:
+    """
+    Moderate an uploaded image using the DeepAI NSFW detector.
+
+    Accepts .jpg, .jpeg, or .png files and forwards the image to DeepAI's
+    NSFW model. Returns a status indicating whether the image is safe.
+
+    Args:
+        file (UploadFile): The image file uploaded via multipart/form-data.
+
+    Returns:
+        Union[dict, JSONResponse]: A JSON response with either:
+            - {"status": "OK"} if the image is safe
+            - {"status": "REJECTED", "reason": "NSFW content"} if nsfw_score > 0.7
+
+    Raises:
+        HTTPException: If the file format is invalid or the moderation fails.
+    """
     if not file.filename.lower().endswith((".jpg", ".jpeg", ".png")):
         raise HTTPException(status_code=400, detail="Only .jpg, .jpeg, .png files are allowed")
 
