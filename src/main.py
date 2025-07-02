@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 import os
 from typing import AsyncIterator
 
@@ -37,7 +38,10 @@ async def moderate_image(file: UploadFile = File(...)) -> ModerationResponse:
     Returns 'OK' if safe, otherwise 'REJECTED'.
     """
     if not file.filename.lower().endswith((".jpg", ".jpeg", ".png")):
-        raise HTTPException(status_code=400, detail="Only .jpg, .jpeg, .png files are allowed")
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Only .jpg, .jpeg, .png files are allowed"
+        )
 
     try:
         image_bytes = await file.read()
@@ -55,7 +59,7 @@ async def moderate_image(file: UploadFile = File(...)) -> ModerationResponse:
             data=form,
             headers={"api-key": DEEPAI_API_KEY},
         ) as resp:
-            if resp.status != 200:
+            if resp.status != HTTPStatus.OK:
                 text = await resp.text()
                 raise HTTPException(status_code=resp.status, detail=f"API error: {text}")
             data = await resp.json()
@@ -68,7 +72,10 @@ async def moderate_image(file: UploadFile = File(...)) -> ModerationResponse:
     except Exception as e:
         import traceback
         traceback.print_exc()  # Logs full stack trace to console
-        raise HTTPException(status_code=500, detail=f"Moderation failed: {str(e)}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Moderation failed: {str(e)}"
+        )
 
 
 app.include_router(router)
