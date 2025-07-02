@@ -1,0 +1,26 @@
+default_stages: [ pre-commit ]
+fail_fast: true
+
+default_language_version:
+  python: python3.12
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.12
+    hooks:
+      - id: ruff
+        name: Ruff (fix)
+        args: [ --fix, --verbose ]
+        types: [ python ]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [ --maxkb=500 ]
+        stages: [ pre-commit, pre-push ]
+      - id: check-ast
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
