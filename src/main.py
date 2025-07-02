@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi import File
 from fastapi import HTTPException
@@ -6,10 +9,11 @@ from fastapi.responses import JSONResponse
 import requests
 
 
+load_dotenv()
 app = FastAPI()
 
-DEEPAI_API_KEY = "bbfef540-7331-4a29-bc05-9e2b21b006d9"
-NSFW_API_URL = "https://api.deepai.org/api/nsfw-detector"
+NSFW_API_URL = os.getenv("NSFW_API_URL")
+DEEPAI_API_KEY = os.getenv("DEEPAI_API_KEY")
 
 @app.post("/moderate")
 async def moderate_image(file: UploadFile = File(...)):
