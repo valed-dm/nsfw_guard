@@ -9,6 +9,8 @@ from fastapi import UploadFile
 from fastapi.responses import JSONResponse
 import requests
 
+from src.models import ModerationResponse
+
 
 load_dotenv()
 app = FastAPI()
@@ -16,8 +18,8 @@ app = FastAPI()
 NSFW_API_URL = os.getenv("NSFW_API_URL")
 DEEPAI_API_KEY = os.getenv("DEEPAI_API_KEY")
 
-@app.post("/moderate")
-async def moderate_image(file: UploadFile = File(...)) -> Union[dict, JSONResponse]:
+@app.post("/moderate", response_model=ModerationResponse)
+async def moderate_image(file: UploadFile = File(...)) -> ModerationResponse:
     """
     Moderate an uploaded image using the DeepAI NSFW detector.
 
@@ -49,9 +51,8 @@ async def moderate_image(file: UploadFile = File(...)) -> Union[dict, JSONRespon
         nsfw_score = data.get("output", {}).get("nsfw_score", 0)
 
         if nsfw_score > 0.7:
-            return JSONResponse(status_code=200, content={"status": "REJECTED", "reason": "NSFW content"})
-        else:
-            return {"status": "OK"}
+            return ModerationResponse(status="REJECTED", reason="NSFW content")
+        return ModerationResponse(status="OK")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Moderation failed: {str(e)}")
