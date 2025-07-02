@@ -1,0 +1,55 @@
+name: FastAPI CI
+
+on: [ push, pull_request ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [ "3.12", "3.13" ]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Verify Poetry installation
+        run: |
+          echo "Poetry Version:"
+          poetry --version
+          echo "Current PATH:"
+          echo $PATH
+
+      - name: Clear Poetry Cache (if any)
+        run: poetry cache clear --all pypi
+
+      - name: Configure Poetry
+        run: poetry config virtualenvs.in-project true --local
+
+      - name: Install dependencies
+        run: poetry install --no-root --with dev --no-interaction
+
+      - name: Lint with Ruff
+        run: poetry run ruff check .
+
+      - name: Run tests and collect coverage
+        run: poetry run pytest
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
