@@ -1,7 +1,7 @@
 [project]
 name = "nsfw-guard"
 version = "0.1.0"
-description = "Simple nude image AI detectoк"
+description = "Simple nude image AI detector"
 authors = [
     {name = "dmvaled",email = "dmvaled@gmail.com"}
 ]
